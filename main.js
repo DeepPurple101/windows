@@ -20,7 +20,7 @@ function draw() {
   stroke(100);
   strokeWeight(1);
 
-  for (let i = windows.length-1; i >= 0; i--) {
+  for (let i = windows.length - 1; i >= 0; i--) {
     if (draggedWindow !== null) {
       if (draggedWindow[0] === windows[i]) {
         continue;
@@ -33,12 +33,12 @@ function draw() {
 
   if (draggedWindow !== null) {
     const window = createWindow({
-        w: 200,
-        h: 100,
-        x: mouseX - draggedWindow[1][0],
-        y: mouseY - draggedWindow[1][1],
-      });
-      window();
+      w: 200,
+      h: 100,
+      x: mouseX - draggedWindow[1][0],
+      y: mouseY - draggedWindow[1][1],
+    });
+    window();
   }
 
   cursor();
@@ -75,12 +75,18 @@ function mouseReleased() {
 }
 
 function keyPressed() {
-    if (keyCode === 32) {
-        windows = [{ w: 200, h: 100, x: mouseX, y: mouseY }, ...windows]
-    }
-    if (keyCode === 8) {
-        if (windows.length > 0) {
-            windows.splice(windows.length-1)
+  if (keyCode === 32) {
+    windows = [{ w: 200, h: 100, x: mouseX, y: mouseY }, ...windows];
+  }
+  if (keyCode === 8) {
+    if (windows.length > 0) {
+      for (let i = 0; i < windows.length; i++) {
+        const window = windows[i];
+        if (mouseIntersects(window.w, window.h, window.x, window.y)) {
+          windows = windows.filter((item) => item !== window);
+          break;
         }
+      }
     }
+  }
 }
