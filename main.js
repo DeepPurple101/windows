@@ -89,4 +89,7 @@ function keyPressed() {
       }
     }
   }
+  if (keyCode === 67) {
+      windows = [];
+  }
 }
