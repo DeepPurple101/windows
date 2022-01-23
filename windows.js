@@ -1,9 +1,9 @@
 const createWindow = (props) => {
     const {w, h, x, y} = props;
 
-    const draw = () => {
+    const draw = (isHovered = false) => {
         fill(220);
-        if (mouseIntersects(w, h, x, y)) {
+        if (isHovered) {
             fill("#F5F5D6");
         }
         rect(x, y, w, h);

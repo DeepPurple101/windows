@@ -20,6 +20,18 @@ function draw() {
   stroke(100);
   strokeWeight(1);
 
+  // Get hovered wondow
+  let hoveredIndex = -1;
+  if (draggedWindow === null) {
+    for (let i = 0; i < windows.length; i++) {
+      const { w, h, x, y } = windows[i];
+      if (mouseIntersects(w, h, x, y)) {
+        hoveredIndex = i;
+        break;
+      }
+    }
+  }
+
   for (let i = windows.length - 1; i >= 0; i--) {
     if (draggedWindow !== null) {
       if (draggedWindow[0] === windows[i]) {
@@ -28,7 +40,7 @@ function draw() {
     }
 
     const window = createWindow(windows[i]);
-    window();
+    window(hoveredIndex === i);
   }
 
   if (draggedWindow !== null) {
@@ -38,7 +50,7 @@ function draw() {
       x: mouseX - draggedWindow[1][0],
       y: mouseY - draggedWindow[1][1],
     });
-    window();
+    window(true);
   }
 
   cursor();
@@ -90,6 +102,6 @@ function keyPressed() {
     }
   }
   if (keyCode === 67) {
-      windows = [];
+    windows = [];
   }
 }
