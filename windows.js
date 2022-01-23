@@ -1,19 +1,41 @@
 const createWindow = (props) => {
-    const {w, h, x, y} = props;
+    const {w, h, x, y, content} = props;
+
+    const draw = (isHovered = false, showHeader = true) => {
+        fill(220);
+        stroke(100);
+        rect(x, y, w, h);
+        const children = content({ww: w, wh: h, wx: x, wy: y});
+        for (let i = 0; i < children.length; i++) {
+            children[i](isHovered);
+        }
+    }
+
+    return {
+        props: props,
+        draw: draw,
+    };
+}
+
+const createHeaderBar = (props) => {
+    const {ww, wx, wy} = props;
 
     const draw = (isHovered = false) => {
-        fill(220);
+        fill(100);
+        stroke(100);
         if (isHovered) {
-            fill("#F5F5D6");
+            if (mouseIntersects(ww, 20, wx, wy)) {
+                fill(120);
+            }
         }
-        rect(x, y, w, h);
+        rect(wx, wy, ww, 20);
     }
     return draw;
 }
 
 const createCursor = () => {
     const draw = () => {
-        fill(100);
+        fill(255, 0, 0);
         noStroke();
         ellipse(mouseX, mouseY, 10);
     }

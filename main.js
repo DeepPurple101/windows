@@ -1,4 +1,3 @@
-let windows = [];
 let draggedWindow = null;
 let cursor;
 
@@ -7,7 +6,6 @@ function setup() {
   createCanvas(700, 500);
   noStroke();
   cursor = createCursor();
-  windows = [{ w: 200, h: 100, x: 50, y: 50 }];
 }
 
 function draw() {
@@ -15,16 +13,12 @@ function draw() {
 
   fill(0);
   text("Press space to add windows, press backspace to remove them", 10, 20);
-
-  // Windows go here
-  stroke(100);
   strokeWeight(1);
 
-  // Get hovered wondow
   let hoveredIndex = -1;
   if (draggedWindow === null) {
-    for (let i = 0; i < windows.length; i++) {
-      const { w, h, x, y } = windows[i];
+    for (let i = ui.length - 1; i >= 0; i--) {
+      const { w, h, x, y } = ui[i].props;
       if (mouseIntersects(w, h, x, y)) {
         hoveredIndex = i;
         break;
@@ -32,25 +26,23 @@ function draw() {
     }
   }
 
-  for (let i = windows.length - 1; i >= 0; i--) {
+  for (let i = 0; i < ui.length; i++) {
     if (draggedWindow !== null) {
-      if (draggedWindow[0] === windows[i]) {
-        continue;
-      }
+      if (draggedWindow[0] === ui[i]) continue;
     }
-
-    const window = createWindow(windows[i]);
-    window(hoveredIndex === i);
+    ui[i].draw(hoveredIndex === i);
   }
 
   if (draggedWindow !== null) {
-    const window = createWindow({
-      w: 200,
-      h: 100,
+    const props = draggedWindow[0].props;
+    const newWindow = createWindow({
+      w: props.w,
+      h: props.h,
       x: mouseX - draggedWindow[1][0],
       y: mouseY - draggedWindow[1][1],
+      content: props.content,
     });
-    window(true);
+    newWindow.draw(true);
   }
 
   cursor();
@@ -61,10 +53,11 @@ function mouseClicked() {
 }
 
 function mousePressed() {
-  for (let i = 0; i < windows.length; i++) {
-    const window = windows[i];
-    if (mouseIntersects(window.w, window.h, window.x, window.y)) {
-      const distXY = getDistXY(window.x, window.y);
+  for (let i = ui.length - 1; i >= 0; i--) {
+    const window = ui[i];
+    const props = window.props;
+    if (mouseIntersects(props.w, props.h, props.x, props.y)) {
+      const distXY = getDistXY(props.x, props.y);
       draggedWindow = [window, distXY];
       break;
     }
@@ -73,35 +66,47 @@ function mousePressed() {
 
 function mouseReleased() {
   if (draggedWindow === null) return;
-  windows = windows.filter((window) => window !== draggedWindow[0]);
-  windows = [
-    {
-      w: draggedWindow[0].w,
-      h: draggedWindow[0].h,
-      x: mouseX - draggedWindow[1][0],
-      y: mouseY - draggedWindow[1][1],
-    },
-    ...windows,
-  ];
+  ui = ui.filter((window) => window.props !== draggedWindow[0].props);
+  const props = draggedWindow[0].props;
+  const newWindow = createWindow({
+    w: props.w,
+    h: props.h,
+    x: mouseX - draggedWindow[1][0],
+    y: mouseY - draggedWindow[1][1],
+    content: props.content,
+  });
+  ui = [...ui, newWindow];
   draggedWindow = null;
 }
 
 function keyPressed() {
   if (keyCode === 32) {
-    windows = [{ w: 200, h: 100, x: mouseX, y: mouseY }, ...windows];
+    ui = [
+      ...ui,
+      createWindow({
+        w: 200,
+        h: 100,
+        x: mouseX,
+        y: mouseY,
+        content: (props) => {
+          const { ww, wh, wx, wy } = props;
+          return [createHeaderBar({ ww: ww, wx: wx, wy: wy })];
+        },
+      }),
+    ];
   }
   if (keyCode === 8) {
-    if (windows.length > 0) {
-      for (let i = 0; i < windows.length; i++) {
-        const window = windows[i];
-        if (mouseIntersects(window.w, window.h, window.x, window.y)) {
-          windows = windows.filter((item) => item !== window);
+    if (ui.length > 0) {
+      for (let i = ui.length - 1; i >= 0; i--) {
+        const props = ui[i].props;
+        if (mouseIntersects(props.w, props.h, props.x, props.y)) {
+          ui = ui.filter((item) => item.props !== props);
           break;
         }
       }
     }
   }
   if (keyCode === 67) {
-    windows = [];
+    ui = [];
   }
 }
